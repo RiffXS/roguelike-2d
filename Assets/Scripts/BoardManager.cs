@@ -8,10 +8,10 @@ public class BoardManager : MonoBehaviour
         public bool IsPassable;
     }
     
-    private CellData[,] _mBoardData;
+    private CellData[,] _boardData;
     
-    private Tilemap _mTilemap;
-    private Grid _mGrid;
+    private Tilemap _tilemap;
+    private Grid _grid;
 
     public PlayerController player;
 
@@ -22,46 +22,48 @@ public class BoardManager : MonoBehaviour
     public Tile[] wallTiles;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public void Init()
     {
-        _mGrid = GetComponentInChildren<Grid>();
-        _mTilemap = GetComponentInChildren<Tilemap>();
+        _grid = GetComponentInChildren<Grid>();
+        _tilemap = GetComponentInChildren<Tilemap>();
 
-        _mBoardData = new CellData[width, height];
+        _boardData = new CellData[width, height];
         
         for (int y = 0; y < height; ++y)
         {
             for (int x = 0; x < width; ++x)
             {
                 Tile tile;
-                _mBoardData[x, y] = new CellData();
+                _boardData[x, y] = new CellData();
                 
                 if (x == 0 || y == 0 || x == width - 1 || y == height - 1)
                 {
                     tile = wallTiles[Random.Range(0, wallTiles.Length)];
-                    _mBoardData[x, y].IsPassable = false;
+                    _boardData[x, y].IsPassable = false;
                 }
                 else
                 {
                     tile = groundTiles[Random.Range(0, groundTiles.Length)];
-                    _mBoardData[x, y].IsPassable = true;
+                    _boardData[x, y].IsPassable = true;
                 }
                 
-                _mTilemap.SetTile(new Vector3Int(x, y, 0), tile);
+                _tilemap.SetTile(new Vector3Int(x, y, 0), tile);
             }
         }
-        
-        player.Spawn(this, new Vector2Int(1, 1));
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
+    
     public Vector3 CellToWorld(Vector2Int cell)
     {
-        return _mGrid.GetCellCenterWorld((Vector3Int)cell);
+        return _grid.GetCellCenterWorld((Vector3Int)cell);
+    }
+
+    public CellData GetCellData(Vector2Int cell)
+    {
+        if (cell.x < 0 || cell.x >= width || cell.y < 0 || cell.y >= height)
+        {
+            return null;
+        }
+        
+        return _boardData[cell.x, cell.y];
     }
 }
