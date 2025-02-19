@@ -45,6 +45,7 @@ public class PlayerController : MonoBehaviour
 
                 if (cellData != null)
                 {
+                    GameManager.Instance.TurnManager.Tick();
                     MoveTo(newPlayerPosition);
                 }
             }

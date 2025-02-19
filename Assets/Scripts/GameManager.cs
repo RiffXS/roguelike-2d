@@ -7,12 +7,23 @@ public class GameManager : MonoBehaviour
     public BoardManager board;
     public PlayerController playerController;
 
-    private TurnManager _turnManager;
+    public TurnManager TurnManager { get; private set; }
+
+    private void Awake()
+    {
+        if (Instance != null)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        
+        Instance = this;
+    }
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        _turnManager = new TurnManager();
+        TurnManager = new TurnManager();
         
         board.Init();
         playerController.Spawn(board, Vector2Int.one);
