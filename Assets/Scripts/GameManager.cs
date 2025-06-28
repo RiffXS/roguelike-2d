@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class GameManager : MonoBehaviour
 {
@@ -9,6 +10,10 @@ public class GameManager : MonoBehaviour
 
     public TurnManager TurnManager { get; private set; }
 
+    [SerializeField] UIDocument uiDoc;
+    private Label _foodLabel;
+    private int _foodAmount = 100;
+    
     private void Awake()
     {
         if (Instance != null)
@@ -23,10 +28,20 @@ public class GameManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        _foodLabel = uiDoc.rootVisualElement.Q<Label>("FoodLabel");
+        _foodLabel.text = "Food : " + _foodAmount;
+        
         TurnManager = new TurnManager();
+        TurnManager.OnTick += OnTurnHappen;
         
         board.Init();
         playerController.Spawn(board, Vector2Int.one);
+    }
+
+    void OnTurnHappen()
+    {
+        _foodAmount -= 1;
+        _foodLabel.text = "Food : " + _foodAmount;
     }
 
     // Update is called once per frame
