@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -23,11 +24,16 @@ public class BoardManager : MonoBehaviour
     [Header("Tiles")]
     public Tile[] groundTiles;
     public Tile[] wallTiles;
+    [SerializeField]
+    private WallObject[] wallPrefabs;
 
     [Header("Foods")]
-    [SerializeField] int minimumFood;
-    [SerializeField] int maximumFood;
-    [SerializeField] private FoodObject[] foodPrefabs;
+    [SerializeField]
+    private int minimumFood;
+    [SerializeField]
+    private int maximumFood;
+    [SerializeField]
+    private FoodObject[] foodPrefabs;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public void Init()
@@ -62,6 +68,7 @@ public class BoardManager : MonoBehaviour
         }
         
         _emptyCellsList.Remove(new Vector2Int(1, 1));
+        GenerateWall();
         GenerateFood();
     }
     
@@ -70,6 +77,16 @@ public class BoardManager : MonoBehaviour
         return _grid.GetCellCenterWorld((Vector3Int)cell);
     }
 
+    public Tile GetCellTile(Vector2Int cell)
+    {
+        return _tilemap.GetTile<Tile>(new Vector3Int(cell.x, cell.y, 0));
+    }
+    
+    public void SetCellTile(Vector2Int cell, Tile tile)
+    {
+        _tilemap.SetTile(new Vector3Int(cell.x, cell.y, 0), tile);
+    }
+    
     public CellData GetCellData(Vector2Int cell)
     {
         if (cell.x < 0 || cell.x >= width || cell.y < 0 || cell.y >= height)
@@ -80,20 +97,41 @@ public class BoardManager : MonoBehaviour
         return _boardData[cell.x, cell.y];
     }
 
-    void GenerateFood()
+    private void AddObject(CellObject obj, Vector2Int coord)
     {
-        int foodCount = Random.Range(minimumFood, maximumFood + 1);
+        var data = _boardData[coord.x, coord.y];
+        obj.transform.position = CellToWorld(coord);
+        data.ContainedObject = obj;
+        obj.Init(coord);
+    }
+    
+    private void GenerateFood()
+    {
+        var foodCount = Random.Range(minimumFood, maximumFood + 1);
 
-        for (int i = 0; i < foodCount; ++i)
+        for (var i = 0; i < foodCount; ++i)
         {
-            int randomIndex = Random.Range(0, _emptyCellsList.Count);
-            Vector2Int coord = _emptyCellsList[randomIndex];
+            var randomIndex = Random.Range(0, _emptyCellsList.Count);
+            var coord = _emptyCellsList[randomIndex];
             
             _emptyCellsList.RemoveAt(randomIndex);
-            CellData data = _boardData[coord.x, coord.y];
-            FoodObject newFood = Instantiate(foodPrefabs[Random.Range(0, foodPrefabs.Length)]);
-            newFood.transform.position = CellToWorld(coord);
-            data.ContainedObject = newFood;
+            var newFood = Instantiate(foodPrefabs[Random.Range(0, foodPrefabs.Length)]);
+            AddObject(newFood, coord);
+        }
+    }
+
+    private void GenerateWall()
+    {
+        var wallCount = Random.Range(6, 10);
+        
+        for (var i = 0; i < wallCount; ++i)
+        {
+            var randomIndex = Random.Range(0, _emptyCellsList.Count);
+            var coord = _emptyCellsList[randomIndex];
+            
+            _emptyCellsList.RemoveAt(randomIndex);
+            var newWall = Instantiate(wallPrefabs[Random.Range(0, wallPrefabs.Length)]);
+            AddObject(newWall, coord);
         }
     }
 }

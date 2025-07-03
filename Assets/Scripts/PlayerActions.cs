@@ -106,7 +106,7 @@ public partial class @PlayerActionsScript: IInputActionCollection2, IDisposable
                     ""name"": ""WASD"",
                     ""id"": ""ceebcf07-aa77-4c90-bcde-3aaaaf3adf27"",
                     ""path"": ""2DVector(mode=1)"",
-                    ""interactions"": """",
+                    ""interactions"": ""Tap"",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Move"",

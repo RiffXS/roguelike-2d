@@ -2,17 +2,17 @@ using UnityEngine;
 
 public class CellObject : MonoBehaviour
 {
-    public virtual void PlayerEntered() { }
-    
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    protected Vector2Int Cell;
+
+    public virtual void Init(Vector2Int cell)
     {
-        
+        Cell = cell;
     }
 
-    // Update is called once per frame
-    void Update()
+    public virtual bool PlayerWantsToEnter()
     {
-        
+        return true;
     }
+    
+    public virtual void PlayerEntered() { }
 }

@@ -46,10 +46,15 @@ public class PlayerController : MonoBehaviour
                 if (cellData != null && cellData.IsPassable)
                 {
                     GameManager.Instance.TurnManager.Tick();
-                    MoveTo(newPlayerPosition);
 
-                    if (cellData.ContainedObject != null)
+                    _canMove = false;
+                    if (!cellData.ContainedObject)
                     {
+                        MoveTo(newPlayerPosition);
+                    }
+                    else if (cellData.ContainedObject.PlayerWantsToEnter())
+                    {
+                        MoveTo(newPlayerPosition);
                         cellData.ContainedObject.PlayerEntered();
                     }
                 }
@@ -77,7 +82,6 @@ public class PlayerController : MonoBehaviour
 
     private void MoveTo(Vector2Int newPlayerPosition)
     {
-        _canMove = false;
         _playerPosition = newPlayerPosition;
         transform.position = _boardManager.CellToWorld(_playerPosition);
     }
