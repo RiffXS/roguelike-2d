@@ -27,6 +27,7 @@ public class WallObject : CellObject
 
     public override bool PlayerWantsToEnter()
     {
+        GameManager.Instance.playerController.Attack();
         _currentHealth -= 1;
 
         if (_currentHealth > 0)

@@ -317,6 +317,7 @@ GameObject:
   m_Component:
   - component: {fileID: 495885191}
   - component: {fileID: 495885190}
+  - component: {fileID: 495885193}
   - component: {fileID: 495885192}
   m_Layer: 0
   m_Name: PlayerCharacter
@@ -407,6 +408,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a7b7a9bcf90f85418b0687d9852aa14, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerPosition: {x: 0, y: 0}
+  movementSpeed: 5
+--- !u!95 &495885193
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 495885189}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: f093bf2d93a4b6047b0175e642a352da, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &996727930
 GameObject:
   m_ObjectHideFlags: 0
@@ -526,8 +551,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 6fb3d5ffcd84d424db71cc52da0b5f1a, type: 2}
   wallTiles:
   - {fileID: 11400000, guid: 07f848b820650714f9abfe23e72bfc90, type: 2}
+  enemyPrefab: {fileID: -2887092001986628841, guid: 6154b6ef2bcd6e14d8f40f990a184291, type: 3}
   wallPrefabs:
   - {fileID: 2697825738442720440, guid: 50c916e7b4e82fe4598cf5ad3509a5f5, type: 3}
+  exitCellPrefab: {fileID: 4604072053817185239, guid: f97f460c6379c064083d4102fde5042a, type: 3}
   minimumFood: 1
   maximumFood: 10
   foodPrefabs:

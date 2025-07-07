@@ -3,34 +3,77 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
+    public Vector2Int playerPosition;
+    
+    private static readonly int Moving = Animator.StringToHash("Moving");
+    private static readonly int Attack1 = Animator.StringToHash("Attack");
     private BoardManager _boardManager;
-    private Vector2Int _playerPosition;
 
+    private bool _gameOver;
+    
+    private float _time;
     private bool _canMove = true;
-    private float _time = 0f;
-    private InputAction _movementAction;
+    private InputAction _enterAction;
+    private InputAction _moveAction;
     private PlayerActionsScript _playerActions;
     
+    public float movementSpeed = 5.0f;
+    
+    [Header("Movement")]
+    private bool _isMoving;
+    private Vector3 _moveTarget;
+    private Animator _animator;
+
+    private void Awake()
+    {
+        _animator = GetComponent<Animator>();
+    }
+    
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private void Start()
     {
         _playerActions = new PlayerActionsScript();
+        
+        _moveAction = _playerActions.Player.Move;
+        _enterAction = _playerActions.Player.Enter;
 
-        _movementAction = _playerActions.Player.Move;
-
-        _movementAction.Enable();
+        _moveAction.Enable();
     }
 
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
+        if (_gameOver)
+        {
+            if (_enterAction.IsPressed())
+            {
+                GameManager.Instance.StartNewGame();
+                _gameOver = false;
+                _enterAction.Disable();
+            }
+            return;
+        }
+
+        if (_isMoving)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, _moveTarget, movementSpeed * Time.deltaTime);
+
+            if (transform.position == _moveTarget)
+            {
+                _isMoving = false;
+                _animator.SetBool(Moving, false);
+                var cellData = _boardManager.GetCellData(playerPosition);
+                cellData.ContainedObject?.PlayerEntered();
+            }
+        }
+        
         bool hasMoved = false;
         
         if (_canMove)
         {
-            Vector2Int newPlayerPosition = _playerPosition;
+            Vector2Int newPlayerPosition = playerPosition;
             
-            Vector2Int valueToAdd = new Vector2Int((int)_movementAction.ReadValue<Vector2>().x, (int)_movementAction.ReadValue<Vector2>().y);
+            Vector2Int valueToAdd = new Vector2Int((int)_moveAction.ReadValue<Vector2>().x, (int)_moveAction.ReadValue<Vector2>().y);
 
             if (valueToAdd != Vector2Int.zero)
             {
@@ -43,7 +86,7 @@ public class PlayerController : MonoBehaviour
                 
                 BoardManager.CellData cellData = _boardManager.GetCellData(newPlayerPosition);
 
-                if (cellData != null && cellData.IsPassable)
+                if (cellData is { IsPassable: true })
                 {
                     GameManager.Instance.TurnManager.Tick();
 
@@ -55,7 +98,6 @@ public class PlayerController : MonoBehaviour
                     else if (cellData.ContainedObject.PlayerWantsToEnter())
                     {
                         MoveTo(newPlayerPosition);
-                        cellData.ContainedObject.PlayerEntered();
                     }
                 }
             }
@@ -71,18 +113,41 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
+
+    public void GameOver()
+    {
+        _gameOver = true;
+        _enterAction.Enable();
+    }
     
     // Spawns the Character
-    public void Spawn(BoardManager boardManager, Vector2Int playerPosition)
+    public void Spawn(BoardManager boardManager, Vector2Int position)
     {
         _boardManager = boardManager;
         
-        MoveTo(playerPosition);
+        MoveTo(position, true);
     }
 
-    private void MoveTo(Vector2Int newPlayerPosition)
+    private void MoveTo(Vector2Int newPlayerPosition, bool immediate = false)
     {
-        _playerPosition = newPlayerPosition;
-        transform.position = _boardManager.CellToWorld(_playerPosition);
+        playerPosition = newPlayerPosition;
+
+        if (immediate)
+        {
+            _isMoving = false;
+            transform.position = _boardManager.CellToWorld(playerPosition);
+        }
+        else
+        {
+            _isMoving = true;
+            _moveTarget = _boardManager.CellToWorld(playerPosition);
+            _animator.SetBool(Moving, true);
+        }
+        
+    }
+
+    public void Attack()
+    {
+        _animator.SetTrigger(Attack1);
     }
 }

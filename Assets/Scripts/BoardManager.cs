@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -25,7 +24,11 @@ public class BoardManager : MonoBehaviour
     public Tile[] groundTiles;
     public Tile[] wallTiles;
     [SerializeField]
+    private Enemy enemyPrefab;
+    [SerializeField]
     private WallObject[] wallPrefabs;
+    [SerializeField]
+    private ExitCellObject exitCellPrefab;
 
     [Header("Foods")]
     [SerializeField]
@@ -68,6 +71,8 @@ public class BoardManager : MonoBehaviour
         }
         
         _emptyCellsList.Remove(new Vector2Int(1, 1));
+        GenerateExit();
+        GenerateEnemy();
         GenerateWall();
         GenerateFood();
     }
@@ -97,6 +102,29 @@ public class BoardManager : MonoBehaviour
         return _boardData[cell.x, cell.y];
     }
 
+    public void ClearLevel()
+    {
+        if (_boardData == null)
+        {
+            return;
+        }
+        
+        for (var y = 0; y < height; ++y)
+        {
+            for (var x = 0; x < width; ++x)
+            {
+                var cellData = _boardData[x, y];
+
+                if (cellData.ContainedObject)
+                {
+                    Destroy(cellData.ContainedObject.gameObject);
+                }
+                
+                SetCellTile(new Vector2Int(x, y), null);
+            }
+        }
+    }
+
     private void AddObject(CellObject obj, Vector2Int coord)
     {
         var data = _boardData[coord.x, coord.y];
@@ -104,20 +132,25 @@ public class BoardManager : MonoBehaviour
         data.ContainedObject = obj;
         obj.Init(coord);
     }
-    
-    private void GenerateFood()
-    {
-        var foodCount = Random.Range(minimumFood, maximumFood + 1);
 
-        for (var i = 0; i < foodCount; ++i)
-        {
-            var randomIndex = Random.Range(0, _emptyCellsList.Count);
-            var coord = _emptyCellsList[randomIndex];
-            
-            _emptyCellsList.RemoveAt(randomIndex);
-            var newFood = Instantiate(foodPrefabs[Random.Range(0, foodPrefabs.Length)]);
-            AddObject(newFood, coord);
-        }
+    private void GenerateExit()
+    {
+        var index = _emptyCellsList.Count - 1;
+        var coord = _emptyCellsList[index];
+        
+        _emptyCellsList.RemoveAt(index);
+        var exitCell = Instantiate(exitCellPrefab);
+        AddObject(exitCell, coord);
+    }
+
+    private void GenerateEnemy()
+    {
+        var randomIndex = Random.Range(_emptyCellsList.Count / 2, _emptyCellsList.Count - 1);
+        var coord = _emptyCellsList[randomIndex];
+        
+        _emptyCellsList.RemoveAt(randomIndex);
+        var newEnemy = Instantiate(enemyPrefab);
+        AddObject(newEnemy, coord);
     }
 
     private void GenerateWall()
@@ -132,6 +165,21 @@ public class BoardManager : MonoBehaviour
             _emptyCellsList.RemoveAt(randomIndex);
             var newWall = Instantiate(wallPrefabs[Random.Range(0, wallPrefabs.Length)]);
             AddObject(newWall, coord);
+        }
+    }
+    
+    private void GenerateFood()
+    {
+        var foodCount = Random.Range(minimumFood, maximumFood + 1);
+
+        for (var i = 0; i < foodCount; ++i)
+        {
+            var randomIndex = Random.Range(0, _emptyCellsList.Count);
+            var coord = _emptyCellsList[randomIndex];
+            
+            _emptyCellsList.RemoveAt(randomIndex);
+            var newFood = Instantiate(foodPrefabs[Random.Range(0, foodPrefabs.Length)]);
+            AddObject(newFood, coord);
         }
     }
 }
